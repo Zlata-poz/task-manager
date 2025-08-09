@@ -20,11 +20,7 @@ public class TaskManager {
         this.scanner = scanner;
     }
 
-    public void getOutstandingTask() {
-        System.out.println("Вы хотите ознакомиться со списком:");
-        System.out.println("1. Выполненных задач");
-        System.out.println("2. Невыполненных задач");
-        int number = safeReadInt(scanner);
+    public void getOutstandingTask(int number) {
         boolean warning = true;
         while (warning) {
             if (number == 1) {
@@ -57,48 +53,15 @@ public class TaskManager {
         }
     }
 
-    public void addTask() {
-        System.out.println("Введите название задачи: ");
-        String name;
-        while (true) {
-            name = scanner.nextLine();
-            if (name.trim().isEmpty()) {
-                System.out.println("Введите не пустую строку.");
-            } else {
-                break;
-            }
-        }
-
-        LocalDateTime dateTime = null;
-        while (dateTime == null) {
-            System.out.println("Введите дедлайн для задачи: ");
-            String date = scanner.nextLine();
-            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ENGLISH);
-            try {
-                dateTime = LocalDateTime.parse(date, dateFormat);
-            } catch (Exception e) {
-                System.out.println("Вы ввели дату и/или время неправильно, повторите снова.");
-            }
-        }
-        Task task1 = new Task(name, dateTime);
+    public void addTask(String name, LocalDateTime date) {
+        Task task1 = new Task(name, date);
         tasks.add(task1);
         System.out.println("Задача успешно добавлена.");
         sortTask();
         saveTaskToFile("tasks.json", tasks);
     }
 
-    public void changeTaskState() {
-        System.out.println("Введите название выполненной задачи");
-
-        String name;
-        while (true) {
-            name = scanner.nextLine();
-            if (name.trim().isEmpty()) {
-                System.out.println("Введите не пустую строку.");
-            } else {
-                break;
-            }
-        }
+    public void changeTaskState(String name) {
 
         String finalName1 = name;
         Optional<Task> found = tasks.stream().filter(task -> task.getName().equalsIgnoreCase(finalName1)).findFirst();
@@ -114,28 +77,15 @@ public class TaskManager {
         }
     }
 
-    public void deleteTask() {
-        System.out.println("Введите название задачи, которую хотите удалить");
-        String name = scanner.nextLine();
+    public void deleteTask(String name) {
         tasks.removeIf(task1 -> task1.getName().equalsIgnoreCase(name));
     }
 
-    public void cleanTaskList() {
-        System.out.println("Какой список вы хотите очистить?");
-        System.out.println("1. Выполненных задач");
-        System.out.println("2. Невыполненных задач");
-        int number = safeReadInt(scanner);
-        boolean warning = true;
-        while (warning) {
-            if (number == 1) {
-                completedTasks.clear();
-                warning = false;
-            } else if (number == 2) {
-                tasks.clear();
-                warning = false;
-            } else {
-                System.out.println("Некорректный ввод данных. Повторите снова.");
-            }
+    public void cleanTaskList(int number) {
+        if (number == 1) {
+            completedTasks.clear();
+        } else if (number == 2) {
+            tasks.clear();
         }
     }
 
@@ -167,18 +117,8 @@ public class TaskManager {
         }
     }
 
-    public int safeReadInt(Scanner scanner) {
-        while (true) {
-            String input = scanner.nextLine();
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Ошибка! Введите число!");
-            }
-        }
-    }
 
-    public void saveTaskToFile(String filename, List<Task> taskList) {
+    private void saveTaskToFile(String filename, List<Task> taskList) {
         Gson gson = new Gson();
         try (Writer writer = new FileWriter(filename)) {
             gson.toJson(taskList, writer);
